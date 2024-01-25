@@ -1,21 +1,29 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { PracticaRdsStack } from '../lib/practica-rds-stack';
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { PracticaRdsStack } from "../lib/practica-rds-stack";
 
 const app = new cdk.App();
-new PracticaRdsStack(app, 'PracticaRdsStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const Main = async (app: cdk.App) => {
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+  //contexto
+  const stage = app.node.tryGetContext("stage") || "dev";
+  const region = app.node.tryGetContext("region") || "us-east-2";
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-});
+  try {
+    new PracticaRdsStack(app, "practica-rds-stack", {
+      stackName: `practica-rds-stack`,
+      env: {
+        region: process.env.CDK_DEFAULT_REGION,
+        account: process.env.CDK_DEFAULT_ACCOUNT,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+  }
+
+  app.synth();
+};
+
+Main(app);
