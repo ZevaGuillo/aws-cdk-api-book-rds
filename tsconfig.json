@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "esModuleInterop": false,
     "target": "ES2020",
     "module": "commonjs",
     "lib": [
@@ -24,9 +25,13 @@
       "./node_modules/@types"
     ],
     "outDir": "/dist",
+    "baseUrl": "./",
+    "paths": {
+      "/opt/nodejs/pg-utils": ["src/layers/pg-utils/nodejs/pg-utils"],
+    }
   },
   "exclude": [
     "node_modules",
     "cdk.out"
-  ] 
+  ], 
 }
