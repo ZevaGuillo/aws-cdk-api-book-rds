@@ -1,5 +1,6 @@
 {
   "app": "npx ts-node --prefer-ts-exts bin/practica-rds.ts",
+  "output":"dist",
   "watch": {
     "include": [
       "**"
