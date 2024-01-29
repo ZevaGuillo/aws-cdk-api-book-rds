@@ -1,4 +1,4 @@
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import { RestApi, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
 import * as iam from "aws-cdk-lib/aws-iam";
 import { NodejsFunction, type NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -10,7 +10,7 @@ import { Duration } from 'aws-cdk-lib';
 
 type ApiLambdaProps = {
     name: string,
-    lambdaProps?: NodejsFunctionProps 
+    lambdaProps?: NodejsFunctionProps
 }
 
 export class ApiLambda extends Construct {
@@ -35,7 +35,7 @@ export class ApiLambda extends Construct {
 
         lambdaRole.addToPolicy(cloudwatchPolicy)
 
-        const api = new apigateway.RestApi(this, 'api', {
+        const api = new RestApi(this, 'api', {
             description: `${props.name}`,
             restApiName: `${props.name}`,
             deployOptions: {
@@ -61,11 +61,11 @@ export class ApiLambda extends Construct {
 
         const books = api.root.addResource('books');
 
-        books.addMethod('GET', new apigateway.LambdaIntegration(this._lambdafn))
+        books.addMethod('ANY', new LambdaIntegration(this._lambdafn))
 
     }
 
-    get lambdafn(){
+    get lambdafn() {
         return this._lambdafn
     }
 
