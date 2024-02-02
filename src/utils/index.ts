@@ -2,7 +2,7 @@ import { APIGatewayProxyResult } from "aws-lambda";
 
 export const sendResponse = <T>(data: T, code: number): APIGatewayProxyResult => {
     return {
-        statusCode: code,
+        statusCode: code,   
         body: JSON.stringify(data),
     };
 };
