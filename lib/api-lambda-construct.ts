@@ -4,6 +4,7 @@ import {
   EndpointType,
   Cors,
   IResource,
+  MethodOptions,
 } from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import {
@@ -19,15 +20,18 @@ import { Duration } from "aws-cdk-lib";
 type ApiLambdaProps = {
   name: string;
   lambdaProps?: NodejsFunctionProps;
+  apiGatewayOptions?: MethodOptions;
 };
 
 export class ApiLambda extends Construct {
-  private apiResource: IResource;
+  public readonly apiResource: IResource;
+  public readonly apiFunction: NodejsFunction;
+  public readonly apiGateway: RestApi;
 
   constructor(scope: Construct, id: string, props: ApiLambdaProps) {
     super(scope, id);
 
-    const api = new RestApi(this, "api", {
+    this.apiGateway = new RestApi(this, "api", {
       description: `${props.name}`,
       restApiName: `${props.name}`,
       endpointTypes: [EndpointType.REGIONAL],
@@ -39,7 +43,7 @@ export class ApiLambda extends Construct {
       },
     });
 
-    this.apiResource = api.root.addResource("book");
+    this.apiResource = this.apiGateway.root.addResource("book");
     const entry = path.join(__dirname, `/../src/handler.ts`);
 
     // Define the IAM role to lambda
@@ -59,7 +63,7 @@ export class ApiLambda extends Construct {
 
     // Define the IAM role to lambdaF
 
-    const lambdafn = new NodejsFunction(this, "lambda.name", {
+    this.apiFunction = new NodejsFunction(this, "lambda.name", {
       bundling: {
         minify: true,
         externalModules: ["aws-sdk"],
@@ -77,9 +81,10 @@ export class ApiLambda extends Construct {
 
     const idBooks = this.apiResource.addResource("{id}");
 
-    this.apiResource.addMethod("GET", new LambdaIntegration(lambdafn));
-    this.apiResource.addMethod("POST", new LambdaIntegration(lambdafn));
-    idBooks.addMethod("PUT", new LambdaIntegration(lambdafn));
-    idBooks.addMethod("DELETE", new LambdaIntegration(lambdafn));
+    this.apiResource.addMethod("GET", new LambdaIntegration(this.apiFunction), props.apiGatewayOptions);
+    this.apiResource.addMethod("POST", new LambdaIntegration(this.apiFunction), props.apiGatewayOptions);
+    idBooks.addMethod("PUT", new LambdaIntegration(this.apiFunction), props.apiGatewayOptions);
+    idBooks.addMethod("DELETE", new LambdaIntegration(this.apiFunction), props.apiGatewayOptions);
   }
+
 }

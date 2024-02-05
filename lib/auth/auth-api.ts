@@ -38,12 +38,12 @@ export class AuthApi extends Construct {
 
     this.auth = api.root.addResource("auth");
 
-    const entry = path.join(__dirname, `/../src/auth`);;
+    const entry = path.join(__dirname, `/../../src/auth`);;
 
-    this.addRoute("signout", "GET", "SignoutFn", `${entry}/signout.ts`);
-    this.addRoute("signup","POST","SignupFn",`${entry}/signup.ts`,true,"cognito-idp:*");
-    this.addRoute("signin","POST","SigninFn",`${entry}/signin.ts`,true,"cognito-idp:*");
-    this.addRoute("confirm_signup","POST","ConfirmFn",`${entry}/confirm-signup.ts`,true,"cognito-idp:*");
+    this.addRoute("logout", "GET", "LogoutFn", `${entry}/logout.ts`);
+    this.addRoute("register","POST","RegisterFn",`${entry}/register.ts`,true,"cognito-idp:*");
+    this.addRoute("login","POST","LoginFn",`${entry}/login.ts`,true,"cognito-idp:*");
+    this.addRoute("confirm_register","POST","ConfirmFn",`${entry}/confirm-register.ts`,true,"cognito-idp:*");
   }
 
   private addRoute(

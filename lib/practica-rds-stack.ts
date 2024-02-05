@@ -7,6 +7,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import { SecurityGroup, Vpc } from "aws-cdk-lib/aws-ec2";
 import { CognitoUserPool } from "./auth/user-pool";
 import { AuthApi } from "./auth/auth-api";
+import { AuthorizationType, CognitoUserPoolsAuthorizer } from "aws-cdk-lib/aws-apigateway";
 
 export class PracticaRdsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -40,13 +41,23 @@ export class PracticaRdsStack extends cdk.Stack {
     // }));
 
     // cognito
-    const userPool = new CognitoUserPool(this, "UserPool");
-    const { userPoolId, userPoolClientId } = userPool;
+    const userPoolConstruct = new CognitoUserPool(this, "UserPool");
+    const { userPoolId, userPoolClientId } = userPoolConstruct;
 
     new AuthApi(this, "AuthServiceApi", {
       userPoolId,
       userPoolClientId,
     });
+
+    const authAW = new CognitoUserPoolsAuthorizer(
+      this,
+      "SpacesApiAuthorizer",
+      {
+        cognitoUserPools: [userPoolConstruct.userPool],
+        identitySource: "method.request.header.Authorization",
+        authorizerName: "cognito-autorizer",
+      }
+    );
 
     // api gateway con lambda
     const rdsApiLambda = new ApiLambda(this, "api-lambda", {
@@ -65,6 +76,16 @@ export class PracticaRdsStack extends cdk.Stack {
         },
         allowPublicSubnet: true,
       },
+      apiGatewayOptions:{
+        authorizationType: AuthorizationType.COGNITO,
+        authorizer: {
+          authorizerId: authAW.authorizerId,
+        },
+      }
     });
+
+    authAW._attachToApi(rdsApiLambda.apiGateway);
+
+
   }
 }
